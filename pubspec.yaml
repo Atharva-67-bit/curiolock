@@ -1,0 +1,30 @@
+name: curiolock
+description: CurioLock — Smart Vault 3.0 companion app. From Curiosity to Security.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  provider: ^6.1.2          # simple state management (VaultController)
+  google_fonts: ^6.2.1      # Poppins + Inter
+  flutter_blue_plus: ^1.32.7 # BLE to the ESP32 (Android + iOS)
+  shared_preferences: ^2.2.3
+  intl: ^0.19.0             # date/time formatting in the activity log
+
+  # --- Firebase (uncomment after running `flutterfire configure`) ---
+  # firebase_core: ^2.31.0
+  # firebase_auth: ^4.19.4
+  # cloud_firestore: ^4.17.3
+  # firebase_messaging: ^14.9.3
+  # local_auth: ^2.2.0       # phone biometrics (future Face/Fingerprint)
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

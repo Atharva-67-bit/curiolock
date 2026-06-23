@@ -1,0 +1,58 @@
+# Codemagic CI/CD — builds CurioLock for BOTH Android and iOS in the cloud.
+# Why: iOS apps can't be built on Windows; Codemagic's macOS machines do it for you.
+# Setup: push this repo to GitHub, add the app in Codemagic, configure signing (see PUBLISHING.md).
+# Docs: https://docs.codemagic.io/yaml/yaml-getting-started/
+
+workflows:
+  # ---------------------------------------------------------------- ANDROID ---
+  android-release:
+    name: CurioLock Android (APK + AAB)
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+      groups:
+        - android_keystore   # set keystore vars in Codemagic UI for a SIGNED release (see guide)
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Build APK (installable / share directly)
+        script: flutter build apk --release
+      - name: Build AAB (for Play Store upload)
+        script: flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - swastik.pro.vaish@gmail.com
+
+  # -------------------------------------------------------------------- iOS ---
+  ios-release:
+    name: CurioLock iOS (IPA)
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: CurioLock_ASC_Key   # name of the App Store Connect API key you add in Codemagic
+    environment:
+      flutter: stable
+      ios_signing:
+        distribution_type: app_store          # use 'ad_hoc' for direct-install test builds
+        bundle_identifier: com.curiousaders.curiolock
+    scripts:
+      - name: Get packages
+        script: flutter pub get
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build signed IPA
+        script: flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - swastik.pro.vaish@gmail.com
+      app_store_connect:                      # auto-upload to TestFlight after build
+        auth: integration
+        submit_to_testflight: true
