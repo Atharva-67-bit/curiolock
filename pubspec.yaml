@@ -25,6 +25,18 @@ dependencies:
 
 dev_dependencies:
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# App launcher icon for all platforms (generated from icon_source.png).
+flutter_launcher_icons:
+  image_path: "icon_source.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    background_color: "#0A0E1A"
+    theme_color: "#3B82F6"
 
 flutter:
   uses-material-design: true
