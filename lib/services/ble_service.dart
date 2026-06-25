@@ -144,6 +144,15 @@ class BleService {
           return true;
         case 'changepw':
           return cmd['old'] == '1234';
+        case 'checkpw':
+          final ok = cmd['pwd'] == '1234';
+          _mock = _mock.copyWith(lastResult: ok ? 'check_ok' : 'check_fail');
+          _statusCtrl.add(_mock);
+          return ok;
+        case 'getpw':
+          _mock = _mock.copyWith(lastResult: 'reveal', pwd: '1234');
+          _statusCtrl.add(_mock);
+          return true;
         default:
           return true;
       }

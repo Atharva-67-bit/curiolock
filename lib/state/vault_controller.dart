@@ -88,6 +88,22 @@ class VaultController extends ChangeNotifier {
   Future<bool> changePassword(String oldPin, String newPin) =>
       _ble.sendCommand({'cmd': 'changepw', 'old': oldPin, 'new': newPin});
 
+  /// VERIFY: ask the vault whether [pin] is the current password (never reveals it).
+  Future<bool> verifyPassword(String pin) async {
+    final ok = await _ble.sendCommand({'cmd': 'checkpw', 'pwd': pin});
+    await Future.delayed(const Duration(milliseconds: 600)); // wait for the status notify
+    if (status.lastResult == 'check_ok') return true;
+    if (status.lastResult == 'check_fail') return false;
+    return ok; // fallback (mock returns directly)
+  }
+
+  /// REVEAL: ask the vault to send back the current PIN once.
+  Future<String?> revealPassword() async {
+    await _ble.sendCommand({'cmd': 'getpw'});
+    await Future.delayed(const Duration(milliseconds: 600));
+    return status.pwd;
+  }
+
   void setAutoLock(int seconds) {
     autoLockSeconds = seconds;
     notifyListeners();

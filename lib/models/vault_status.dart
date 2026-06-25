@@ -4,9 +4,10 @@ class VaultStatus {
   final int battery; // 0..100
   final int rssi;
   final DateTime? lastAccess;
-  final String lastResult; // success | fail | locked_out | idle
+  final String lastResult; // success | fail | locked_out | idle | check_ok | check_fail | reveal
   final int failCount;
   final String fw;
+  final String? pwd; // current PIN, only present right after a getpw (reveal) request
 
   const VaultStatus({
     required this.locked,
@@ -16,6 +17,7 @@ class VaultStatus {
     this.lastResult = 'idle',
     this.failCount = 0,
     this.fw = '1.0.0',
+    this.pwd,
   });
 
   factory VaultStatus.unknown() => const VaultStatus(locked: true, battery: 0);
@@ -30,9 +32,11 @@ class VaultStatus {
         lastResult: (j['lastResult'] ?? 'idle') as String,
         failCount: (j['failCount'] ?? 0) as int,
         fw: (j['fw'] ?? '1.0.0') as String,
+        pwd: j['pwd'] as String?,
       );
 
-  VaultStatus copyWith({bool? locked, int? battery, String? lastResult, DateTime? lastAccess}) =>
+  VaultStatus copyWith(
+          {bool? locked, int? battery, String? lastResult, DateTime? lastAccess, String? pwd}) =>
       VaultStatus(
         locked: locked ?? this.locked,
         battery: battery ?? this.battery,
@@ -41,5 +45,6 @@ class VaultStatus {
         lastResult: lastResult ?? this.lastResult,
         failCount: failCount,
         fw: fw,
+        pwd: pwd ?? this.pwd,
       );
 }

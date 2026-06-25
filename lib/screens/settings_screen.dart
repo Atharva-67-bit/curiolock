@@ -4,6 +4,7 @@ import '../state/vault_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/curio_widgets.dart';
 import 'change_password_screen.dart';
+import 'password_tools_screen.dart';
 import 'login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -28,6 +29,15 @@ class SettingsScreen extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ChangePasswordScreen())),
+                ),
+                const Divider(color: AppColors.surfaceBorder),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.password_rounded, color: AppColors.accent),
+                  title: const Text('Check / view password'),
+                  trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const PasswordToolsScreen())),
                 ),
                 const Divider(color: AppColors.surfaceBorder),
                 ListTile(
