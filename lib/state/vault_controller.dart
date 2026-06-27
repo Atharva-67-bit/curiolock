@@ -91,7 +91,7 @@ class VaultController extends ChangeNotifier {
   /// VERIFY: ask the vault whether [pin] is the current password (never reveals it).
   Future<bool> verifyPassword(String pin) async {
     final ok = await _ble.sendCommand({'cmd': 'checkpw', 'pwd': pin});
-    await Future.delayed(const Duration(milliseconds: 600)); // wait for the status notify
+    await Future.delayed(const Duration(milliseconds: 300)); // wait for the status notify
     if (status.lastResult == 'check_ok') return true;
     if (status.lastResult == 'check_fail') return false;
     return ok; // fallback (mock returns directly)
@@ -100,7 +100,7 @@ class VaultController extends ChangeNotifier {
   /// REVEAL: ask the vault to send back the current PIN once.
   Future<String?> revealPassword() async {
     await _ble.sendCommand({'cmd': 'getpw'});
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 300));
     return status.pwd;
   }
 

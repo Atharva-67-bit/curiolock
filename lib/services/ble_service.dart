@@ -86,7 +86,7 @@ class BleService {
   Future<void> connectTo(String deviceId) async {
     await stopScan();
     if (useMock) {
-      await Future.delayed(const Duration(milliseconds: 1200)); // simulate pairing
+      await Future.delayed(const Duration(milliseconds: 500)); // simulate pairing
       _connCtrl.add(true);
       _statusCtrl.add(_mock);
       _mockBattTimer?.cancel();
@@ -126,7 +126,7 @@ class BleService {
   // ------------------------------------------------------------- COMMAND -----
   Future<bool> sendCommand(Map<String, dynamic> cmd) async {
     if (useMock) {
-      await Future.delayed(const Duration(milliseconds: 350));
+      await Future.delayed(const Duration(milliseconds: 120));
       switch (cmd['cmd']) {
         case 'unlock':
           final ok = cmd['pwd'] == '1234';
