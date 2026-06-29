@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../models/discovered_vault.dart';
 import '../models/vault_status.dart';
 
@@ -55,21 +56,33 @@ class BleService {
       return;
     }
     // REAL:
+    // Ask for runtime BLE permissions (Android 12+ needs SCAN + CONNECT; older
+    // Android needs location). Without these the scan silently returns nothing.
+    await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
+
+    // Scan WITHOUT a service filter — the ESP32's 128-bit UUID + name may not fit
+    // in the 31-byte advert packet, which hides it from a UUID-filtered scan.
+    // Instead we scan everything and match by name.
     await FlutterBluePlus.startScan(
-      withServices: [Guid(serviceUuid)],
       continuousUpdates: true,
       timeout: const Duration(seconds: 30),
     );
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
-      final vaults = results
-          .map((r) => DiscoveredVault(
-                id: r.device.remoteId.str,
-                name: r.advertisementData.advName.isNotEmpty
-                    ? r.advertisementData.advName
-                    : 'CurioLock-Vault',
-                rssi: r.rssi,
-              ))
-          .toList();
+      final vaults = results.where((r) {
+        final n = r.advertisementData.advName.isNotEmpty
+            ? r.advertisementData.advName
+            : r.device.platformName;
+        return n.toLowerCase().contains('curiolock');
+      }).map((r) {
+        final n = r.advertisementData.advName.isNotEmpty
+            ? r.advertisementData.advName
+            : (r.device.platformName.isNotEmpty ? r.device.platformName : 'CurioLock-Vault');
+        return DiscoveredVault(id: r.device.remoteId.str, name: n, rssi: r.rssi);
+      }).toList();
       _scanCtrl.add(vaults);
     });
   }
