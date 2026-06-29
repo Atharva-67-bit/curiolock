@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../state/vault_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/curio_widgets.dart';
@@ -29,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Row(
                 children: [
-                  Text('Hi, Atharv 👋', style: Theme.of(context).textTheme.titleLarge),
+                  Text('Hi, ${_name(context)} 👋', style: Theme.of(context).textTheme.titleLarge),
                   const Spacer(),
                   StatusPill(
                     label: c.connected ? 'Connected' : (c.busy ? 'Scanning' : 'Offline'),
@@ -82,7 +83,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const Icon(Icons.history, color: AppColors.accent),
                       const SizedBox(height: 8),
                       Text(
-                        s.lastAccess != null ? DateFormat('HH:mm').format(s.lastAccess!) : '—',
+                        _lastAccess(c.lastAccessAt),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Text('Last access', style: Theme.of(context).textTheme.bodySmall),
@@ -137,6 +138,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  String _name(BuildContext context) {
+    final email = context.read<AuthService>().email ?? '';
+    final n = email.split('@').first;
+    return n.isEmpty ? 'there' : n;
+  }
+
+  String _lastAccess(DateTime? t) {
+    if (t == null) return '—';
+    final d = DateTime.now().difference(t);
+    if (d.inSeconds < 60) return 'Just now';
+    if (d.inMinutes < 60) return '${d.inMinutes}m ago';
+    if (d.inHours < 24) return '${d.inHours}h ago';
+    return DateFormat('MMM d, HH:mm').format(t);
   }
 
   IconData _batteryIcon(int b) => b > 60

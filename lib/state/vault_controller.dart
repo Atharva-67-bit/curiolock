@@ -16,6 +16,8 @@ class VaultController extends ChangeNotifier {
       notifyListeners();
     });
     _ble.statusStream.listen((s) {
+      // Stamp last-access with the PHONE's real clock (the ESP32 has no RTC).
+      if (s.lastResult == 'success' && !s.locked) lastAccessAt = DateTime.now();
       status = s;
       notifyListeners();
     });
@@ -28,6 +30,7 @@ class VaultController extends ChangeNotifier {
   VaultStatus status = VaultStatus.unknown();
   bool connected = false;
   bool busy = false;
+  DateTime? lastAccessAt; // real (phone-clock) time of the last unlock
 
   // discovery / pairing
   List<DiscoveredVault> nearby = [];
