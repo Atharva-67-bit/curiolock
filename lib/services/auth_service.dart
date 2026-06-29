@@ -16,16 +16,25 @@ class AuthService {
   String? get email =>
       firebaseReady ? FirebaseAuth.instance.currentUser?.email : 'demo@curiolock.app';
 
+  String? _mockName;
+  /// The user's display name (falls back to the email prefix).
+  String? get displayName {
+    if (!firebaseReady) return _mockName;
+    final u = FirebaseAuth.instance.currentUser;
+    return (u?.displayName?.isNotEmpty ?? false) ? u!.displayName : null;
+  }
+
   /// Whether the user's email is verified (always true in demo mode).
   bool get isEmailVerified =>
       firebaseReady ? (FirebaseAuth.instance.currentUser?.emailVerified ?? false) : true;
 
   // ---- actions (return null on success, else an error message) -------------
-  Future<String?> signUp(String email, String password) async {
-    if (!firebaseReady) { _mockSignedIn = true; return null; }
+  Future<String?> signUp(String email, String password, String name) async {
+    if (!firebaseReady) { _mockSignedIn = true; _mockName = name; return null; }
     try {
       final cred = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email.trim(), password: password);
+      await cred.user?.updateDisplayName(name.trim()); // store the display name
       await cred.user?.sendEmailVerification(); // sends the verification email
       return null;
     } on FirebaseAuthException catch (e) {

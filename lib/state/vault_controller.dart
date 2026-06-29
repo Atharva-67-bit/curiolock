@@ -71,7 +71,10 @@ class VaultController extends ChangeNotifier {
   final List<ActivityEntry> activities = [];
 
   Future<bool> unlock(String pin) async {
-    final ok = await _ble.sendCommand({'cmd': 'unlock', 'pwd': pin, 'ts': _now()});
+    await _ble.sendCommand({'cmd': 'unlock', 'pwd': pin, 'ts': _now()});
+    // wait for the vault's status reply, then trust its result (not just "sent")
+    await Future.delayed(const Duration(milliseconds: 400));
+    final ok = status.lastResult == 'success' || !status.locked;
     _log(ok ? ActivityType.unlock : ActivityType.fail);
     return ok;
   }

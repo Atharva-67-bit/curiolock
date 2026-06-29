@@ -14,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _name = TextEditingController();
   final _email = TextEditingController();
   final _pass = TextEditingController();
   bool _signUp = false;
@@ -36,10 +37,16 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _error = 'Password must be at least 6 characters.');
       return;
     }
+    if (_signUp && _name.text.trim().isEmpty) {
+      setState(() => _error = 'Please enter your name.');
+      return;
+    }
     setState(() { _loading = true; _error = null; });
 
     final auth = context.read<AuthService>();
-    final err = _signUp ? await auth.signUp(email, pass) : await auth.signIn(email, pass);
+    final err = _signUp
+        ? await auth.signUp(email, pass, _name.text.trim())
+        : await auth.signIn(email, pass);
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -79,6 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 4),
                 Text('From Curiosity to Security', style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 36),
+                if (_signUp) ...[
+                  TextField(
+                    controller: _name,
+                    textCapitalization: TextCapitalization.words,
+                    onChanged: (_) => setState(() => _error = null),
+                    decoration: const InputDecoration(hintText: 'Your name'),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 TextField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,

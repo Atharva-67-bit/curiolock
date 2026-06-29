@@ -141,8 +141,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   String _name(BuildContext context) {
-    final email = context.read<AuthService>().email ?? '';
-    final n = email.split('@').first;
+    final auth = context.read<AuthService>();
+    final dn = auth.displayName;
+    if (dn != null && dn.trim().isNotEmpty) return dn.split(' ').first;
+    final n = (auth.email ?? '').split('@').first;
     return n.isEmpty ? 'there' : n;
   }
 
