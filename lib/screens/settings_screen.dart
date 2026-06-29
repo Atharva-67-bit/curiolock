@@ -21,6 +21,21 @@ class SettingsScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            _header('ACCOUNT'),
+            CurioCard(
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.person_outline, color: AppColors.accent),
+                title: const Text('Display name'),
+                subtitle: Text(
+                  context.watch<AuthService>().displayName ?? 'Tap to set your name',
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+                trailing: const Icon(Icons.edit_outlined, color: AppColors.textMuted, size: 18),
+                onTap: () => _editName(context),
+              ),
+            ),
+            const SizedBox(height: 28),
             _header('SECURITY'),
             CurioCard(
               child: Column(children: [
@@ -104,6 +119,33 @@ class SettingsScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _editName(BuildContext context) {
+    final auth = context.read<AuthService>();
+    final ctrl = TextEditingController(text: auth.displayName ?? '');
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Display name'),
+        content: TextField(
+          controller: ctrl,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(hintText: 'Your name'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () async {
+              await auth.updateName(ctrl.text.trim());
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Save', style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
       ),
     );
   }

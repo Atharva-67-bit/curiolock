@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/activity_entry.dart';
 import '../models/discovered_vault.dart';
@@ -70,11 +71,29 @@ class VaultController extends ChangeNotifier {
   // activity log (newest first)
   final List<ActivityEntry> activities = [];
 
+  /// Completes as soon as the vault sends a status with one of [results]
+  /// (snappy — no fixed delay), or 'timeout' after [timeout].
+  Future<String> _awaitResult(List<String> results,
+      {Duration timeout = const Duration(seconds: 4)}) {
+    final c = Completer<String>();
+    late StreamSubscription sub;
+    sub = _ble.statusStream.listen((s) {
+      if (results.contains(s.lastResult) && !c.isCompleted) {
+        c.complete(s.lastResult);
+        sub.cancel();
+      }
+    });
+    return c.future.timeout(timeout, onTimeout: () {
+      sub.cancel();
+      return 'timeout';
+    });
+  }
+
   Future<bool> unlock(String pin) async {
+    final result = _awaitResult(['success', 'fail', 'locked_out']);
     await _ble.sendCommand({'cmd': 'unlock', 'pwd': pin, 'ts': _now()});
-    // wait for the vault's status reply, then trust its result (not just "sent")
-    await Future.delayed(const Duration(milliseconds: 400));
-    final ok = status.lastResult == 'success' || !status.locked;
+    final res = await result;            // returns the moment the vault replies
+    final ok = res == 'success';
     _log(ok ? ActivityType.unlock : ActivityType.fail);
     return ok;
   }

@@ -57,6 +57,18 @@ class AuthService {
     }
   }
 
+  /// Set/change the display name (works for existing accounts too).
+  Future<String?> updateName(String name) async {
+    if (!firebaseReady) { _mockName = name; return null; }
+    try {
+      await FirebaseAuth.instance.currentUser?.updateDisplayName(name.trim());
+      await FirebaseAuth.instance.currentUser?.reload();
+      return null;
+    } catch (e) {
+      return 'Could not update name.';
+    }
+  }
+
   Future<String?> sendPasswordReset(String email) async {
     if (!firebaseReady) return 'Set up Firebase to enable password reset (see FIREBASE_SETUP.md).';
     try {
