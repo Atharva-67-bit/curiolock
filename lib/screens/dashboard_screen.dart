@@ -30,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Row(
                 children: [
-                  Text('Hi, ${_name(context)} 👋', style: Theme.of(context).textTheme.titleLarge),
+                  Expanded(child: Text(_greeting(context), style: Theme.of(context).textTheme.titleLarge)),
                   const Spacer(),
                   StatusPill(
                     label: c.connected ? 'Connected' : (c.busy ? 'Scanning' : 'Offline'),
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text(locked ? 'LOCKED' : 'UNLOCKED',
                       style: TextStyle(color: stateColor, fontSize: 24, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
-                  Text(locked ? 'Vault is secure' : 'Vault is open',
+                  Text(locked ? 'Locked & secure 🔒' : 'Open — welcome in! 🎉',
                       style: Theme.of(context).textTheme.bodySmall),
                 ]),
               ),
@@ -138,6 +138,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
+
+  String _greeting(BuildContext context) {
+    final h = DateTime.now().hour;
+    final part = h < 12 ? 'Good morning' : (h < 17 ? 'Good afternoon' : 'Good evening');
+    final emoji = h < 12 ? '☀️' : (h < 17 ? '👋' : '🌙');
+    return '$part, ${_name(context)} $emoji';
   }
 
   String _name(BuildContext context) {

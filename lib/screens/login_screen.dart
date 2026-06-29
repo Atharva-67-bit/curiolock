@@ -7,6 +7,7 @@ import '../widgets/curio_widgets.dart';
 import 'scan_connect_screen.dart';
 import 'verify_email_screen.dart';
 import 'forgot_password_screen.dart';
+import 'name_prompt_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -59,10 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setBool('stayLoggedIn', _stay);
     if (!mounted) return;
 
-    // Route: needs email verification? -> verify screen. Else -> app.
+    // Route: verify email → set name (if missing) → app.
+    final dn = auth.displayName;
     if (AuthService.firebaseReady && !auth.isEmailVerified) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const VerifyEmailScreen()));
+    } else if (dn == null || dn.trim().isEmpty) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const NamePromptScreen()));
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const ScanConnectScreen()));

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -41,8 +42,9 @@ class _KeypadScreenState extends State<KeypadScreen> {
     setState(() => _busy = false);
     if (ok) {
       HapticFeedback.mediumImpact();
+      const msgs = ['Vault unlocked 🎉', "You're in! 🔓", 'Access granted ✨', 'Welcome back 👑'];
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vault unlocked'), backgroundColor: AppColors.success),
+        SnackBar(content: Text(msgs[Random().nextInt(msgs.length)]), backgroundColor: AppColors.success),
       );
       Navigator.of(context).pop();
     } else {
