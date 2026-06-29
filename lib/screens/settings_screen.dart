@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/auth_service.dart';
 import '../state/vault_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/curio_widgets.dart';
@@ -88,8 +90,15 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             TextButton.icon(
-              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()), (r) => false),
+              onPressed: () async {
+                await context.read<AuthService>().signOut();
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('stayLoggedIn', false);
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()), (r) => false);
+                }
+              },
               icon: const Icon(Icons.logout, color: AppColors.danger),
               label: const Text('Sign out', style: TextStyle(color: AppColors.danger)),
             ),

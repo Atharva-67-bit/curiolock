@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/curio_widgets.dart';
@@ -20,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _signUp = false;
   bool _obscure = true;
   bool _loading = false;
+  bool _stay = true; // stay logged in
   String? _error;
 
   bool _emailValid(String e) =>
@@ -51,6 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = false);
 
     if (err != null) { setState(() => _error = err); return; }
+
+    // remember the "stay logged in" choice
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('stayLoggedIn', _stay);
+    if (!mounted) return;
 
     // Route: needs email verification? -> verify screen. Else -> app.
     if (AuthService.firebaseReady && !auth.isEmailVerified) {
@@ -126,6 +133,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                     ),
                   ),
+                Row(children: [
+                  SizedBox(
+                    height: 24, width: 24,
+                    child: Checkbox(
+                      value: _stay,
+                      activeColor: AppColors.accent,
+                      onChanged: (v) => setState(() => _stay = v ?? true),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text('Stay logged in', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                ]),
                 if (_error != null) ...[
                   const SizedBox(height: 6),
                   Row(children: [
